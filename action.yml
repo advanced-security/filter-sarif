@@ -1,8 +1,14 @@
-name: 'Filter Code Scanning paths'
-description: 'Filter Code Scanning paths'
+name: 'Filter SARIF'
+description: 'Filter SARIF results by path'
 inputs:
-  dir:
-    description: 'directory to remove'
+  patterns:
+    description: 'Patterns for the results to remove. If a pattern starts with "-", it is an exclusion pattern, otherwise, it is an inclusion pattern.'
+    required: true
+  input:
+    description: 'Path to the input SARIF file'
+    required: true
+  output:
+    description: 'Path to the input SARIF file'
     required: true
 runs:
   using: 'docker'

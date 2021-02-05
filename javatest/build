@@ -1,0 +1,9 @@
+#!/bin/sh
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+cd $HERE
+./clean
+javac \
+  -Xlint:deprecation \
+  -cp servlet-api-2.4/ \
+  ExposedServlet.java \
+  InternalServlet.java
