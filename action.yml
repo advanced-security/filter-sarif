@@ -1,0 +1,9 @@
+name: 'Filter Code Scanning paths'
+description: 'Filter Code Scanning paths'
+inputs:
+  dir:
+    description: 'directory to remove'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
