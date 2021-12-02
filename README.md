@@ -46,13 +46,13 @@ jobs:
         patterns: |
           +**/*.java
           -**/*Test*.java
-        input: sarif-results/java-builtin.sarif
-        output: sarif-results/java-builtin.sarif
+        input: sarif-results/java.sarif
+        output: sarif-results/java.sarif
 
     - name: Upload SARIF
       uses: github/codeql-action/upload-sarif@v1
       with:
-        sarif_file: sarif-results/java-builtin.sarif
+        sarif_file: sarif-results/java.sarif
 
     - name: Upload loc as a Build Artifact
       uses: actions/upload-artifact@v2.2.0
