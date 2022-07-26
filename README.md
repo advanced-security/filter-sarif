@@ -41,7 +41,7 @@ jobs:
         output: sarif-results
 
     - name: filter-sarif
-      uses: zbazztian/filter-sarif@master
+      uses: advanced-security/filter-sarif@main
       with:
         patterns: |
           +**/*.java
