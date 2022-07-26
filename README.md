@@ -27,15 +27,15 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
 
     - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
+      uses: github/codeql-action/autobuild@v2
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
       with:
         upload: False
         output: sarif-results
@@ -50,7 +50,7 @@ jobs:
         output: sarif-results/java.sarif
 
     - name: Upload SARIF
-      uses: github/codeql-action/upload-sarif@v1
+      uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: sarif-results/java.sarif
 
