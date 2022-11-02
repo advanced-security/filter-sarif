@@ -1,0 +1,2 @@
+*.sarif
+__pycache__/
