@@ -2,7 +2,7 @@
 
 Takes a SARIF file and a list of inclusion and exclusion patterns as input and removes alerts from the SARIF file according to those patterns.
 
-# Example
+## Example
 
 The following example removes all alerts from all Java test files:
 
@@ -64,15 +64,17 @@ jobs:
 
 Note how we provided `upload: False` and `output: sarif-results` to the `analyze` action. That way we can filter the SARIF with the `filter-sarif` action before uploading it via `upload-sarif`. Finally, we also attach the resulting SARIF file to the build, which is convenient for later inspection.
 
-# Patterns
+## Patterns
 
 Each pattern line is of the form:
-```
-[+/-]<file pattern>[:<rule pattern>]
+
+```yaml
+[+/-]<file pattern>[:<rule pattern>][:<message pattern>]
 ```
 
 for example:
-```
+
+```yaml
 -**/*Test*.java:**               # exclusion pattern: remove all alerts from all Java test files
 -**/*Test*.java                  # ditto, short form of the line above
 +**/*.java:java/sql-injection    # inclusion pattern: This line has precedence over the first two
@@ -81,9 +83,23 @@ for example:
 **                               # allow all alerts in all files (reverses all previous lines)
 ```
 
+Subsequent lines override earlier ones. By default all alerts are included.
+
+The file pattern:
+
 * The path separator character in patterns is always `/`, independent of the platform the code is running on and independent of the paths in the SARIF file.
 * `*` matches any character, except a path separator
 * `**` matches any character and is only allowed between path separators, e.g. `/**/file.txt`, `**/file.txt` or `**`. NOT allowed: `**.txt`, `/etc**`
+
+The rule pattern:
+
 * The rule pattern is optional. If omitted, it will apply to alerts of all types.
-* Subsequent lines override earlier ones. By default all alerts are included.
+
+For the file and rule patterns:
+
 * If you need to use the literals `+`, `-`, `\` or `:` in your pattern, you can escape them with `\`, e.g. `\-this/is/an/inclusion/file/pattern\:with-a-semicolon:and/a/rule/pattern/with/a/\\/backslash`. For `+` and `-`, this is only necessary if they appear at the beginning of the pattern line.
+
+The message pattern:
+
+* The message pattern is optional. If omitted, it will apply to all messages.
+* The syntax is python regular expressions. Take care with backtracking and repetition to avoid performance problems.
