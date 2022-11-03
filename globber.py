@@ -21,7 +21,7 @@ _double_star_first_before_invalid_regex = re.compile('^\\*\\*[^/]')
 _double_star_middle_before_invalid_regex = re.compile(r'[^\\]\*\*[^/]')
 
 
-def _match_component(pattern_component, file_name_component):
+def _match_component(pattern_component: str, file_name_component: str) -> bool:
     if len(pattern_component) == 0 and len(file_name_component) == 0:
         return True
     elif len(pattern_component) == 0:
@@ -42,7 +42,7 @@ def _match_component(pattern_component, file_name_component):
         return _match_component(pattern_component[1:], file_name_component[1:])
 
 
-def _match_components(pattern_components, file_name_components):
+def _match_components(pattern_components: list[str], file_name_components: list[str]) -> bool:
     if len(pattern_components) == 0 and len(file_name_components) == 0:
         return True
     if len(pattern_components) == 0:
@@ -57,7 +57,7 @@ def _match_components(pattern_components, file_name_components):
             pattern_components[1:], file_name_components[1:])
 
 
-def match(pattern, file_name):
+def match(pattern: str, file_name: str) -> bool:
     """Match a glob pattern against a file name.
 
     Glob pattern matching is for file names, which do not need to exist as files on the file system.
@@ -83,5 +83,5 @@ def match(pattern, file_name):
         pattern = pattern.replace('**/**', '**')
     pattern_components = pattern.split('/')
     # We split on '\' as well as '/' to support unix and windows-style paths
-    file_name_components = re.split(r'[\\/]', file_name)
+    file_name_components: list[str] = re.split(r'[\\/]', file_name)
     return _match_components(pattern_components, file_name_components)
