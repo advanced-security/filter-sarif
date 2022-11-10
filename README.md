@@ -75,12 +75,13 @@ Each pattern line is of the form:
 for example:
 
 ```yaml
--**/*Test*.java:**               # exclusion pattern: remove all alerts from all Java test files
--**/*Test*.java                  # ditto, short form of the line above
-+**/*.java:java/sql-injection    # inclusion pattern: This line has precedence over the first two
-                                 # and thus "whitelists" alerts of type "java/sql-injection"
-**/*.java:java/sql-injection     # ditto, the "+" in inclusion patterns is optional
-**                               # allow all alerts in all files (reverses all previous lines)
+-**/*Test*.java:**                      # exclusion pattern: remove all alerts from all Java test files
+-**/*Test*.java                         # ditto, short form of the line above
++**/*.java:java/sql-injection           # inclusion pattern: This line has precedence over the first two
+                                        # and thus "whitelists" alerts of type "java/sql-injection"
+**/*.java:java/sql-injection            # ditto, the "+" in inclusion patterns is optional
+**/*.java:java/sql-injection:^hello$    # adding a filter for the message exactly matching the regex '^hello$'
+**                                      # allow all alerts in all files (reverses all previous lines)
 ```
 
 Subsequent lines override earlier ones. By default all alerts are included.
@@ -101,5 +102,5 @@ For the file and rule patterns:
 
 The message pattern:
 
-* The message pattern is optional. If omitted, it will apply to all messages.
+* The message pattern is optional. If omitted, it will allow all messages.
 * The syntax is python regular expressions. Take care with backtracking and repetition to avoid performance problems.
