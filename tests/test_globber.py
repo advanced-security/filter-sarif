@@ -19,4 +19,3 @@ def test_globber():
     assert not globber.match("*.java", "foo/foo.java")
     assert not globber.match("foo/*", "bar/bar.js")
     assert not globber.match("js/*", "java/some-rule-id")
-
