@@ -81,26 +81,33 @@ for example:
                                         # and thus "whitelists" alerts of type "java/sql-injection"
 **/*.java:java/sql-injection            # ditto, the "+" in inclusion patterns is optional
 **/*.java:java/sql-injection:^hello$    # adding a filter for the message exactly matching the regex '^hello$'
+**:**:^foo$                             # only filter for the message exactly matching the regex '^foo$'
 **                                      # allow all alerts in all files (reverses all previous lines)
 ```
 
 Subsequent lines override earlier ones. By default all alerts are included.
 
+For the file and rule patterns:
+
+* These use the `glob` syntax
+* Escaping literals:
+  * If you need to use the literals `\` or `:` in your pattern, you can escape them with `\`
+  * Using `+` or `-` at the start of the file pattern requires escaping it with `\`:
+  * e.g. `\-this/is/an/inclusion/file/pattern\:with-a-semicolon:and/a/rule/pattern/with/a/\\/backslash`
+
 The file pattern:
 
 * The path separator character in patterns is always `/`, independent of the platform the code is running on and independent of the paths in the SARIF file.
 * `*` matches any character, except a path separator
-* `**` matches any character and is only allowed between path separators, e.g. `/**/file.txt`, `**/file.txt` or `**`. NOT allowed: `**.txt`, `/etc**`
+* `**` matches any character and is only allowed between path separators or on its own, e.g. `/**/file.txt`, `**/file.txt` or `**`. NOT allowed: `**.txt`, `/etc**`
 
 The rule pattern:
 
 * The rule pattern is optional. If omitted, it will apply to alerts of all types.
-
-For the file and rule patterns:
-
-* If you need to use the literals `+`, `-`, `\` or `:` in your pattern, you can escape them with `\`, e.g. `\-this/is/an/inclusion/file/pattern\:with-a-semicolon:and/a/rule/pattern/with/a/\\/backslash`. For `+` and `-`, this is only necessary if they appear at the beginning of the pattern line.
+* Use `**` for any rule, and `*` for wildcards around the `/` namespace separator
 
 The message pattern:
 
 * The message pattern is optional. If omitted, it will allow all messages.
 * The syntax is python regular expressions. Take care with backtracking and repetition to avoid performance problems.
+* If you need to use `\` or `:` in your pattern, you can escape them with `\`
