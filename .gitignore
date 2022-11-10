@@ -1,3 +1,3 @@
-*.sarif
+test_output_*.sarif
 __pycache__/
 .trunk/
