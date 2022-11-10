@@ -73,7 +73,7 @@ def parse_pattern(line: str) -> Tuple[bool, str, Optional[str], Optional[str]]:
         if c == sepchar:
             seen_separator += 1
             if seen_separator > 2:
-                raise Exception(
+                raise ValueError(
                     f'Invalid pattern: "{line}" contains more than two separators. Use {escchar}{sepchar} to escape the separator.'
                 )
             if seen_separator == 1:
