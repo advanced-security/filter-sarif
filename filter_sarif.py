@@ -7,10 +7,11 @@ File paths and rule ids are filtered using glob patterns. Message patterns are p
 
 import argparse
 import json
-import re
-from typing import Any, Dict, Iterable, NoReturn, Optional, Tuple, List
-from globber import match
 import logging
+import re
+from typing import Any, Dict, Iterable, List, NoReturn, Optional, Tuple
+
+from globber import match
 
 LOG = logging.getLogger(__name__)
 
@@ -149,41 +150,42 @@ def filter_sarif(args: argparse.Namespace) -> None:
     with open(args.input, 'r') as input_file:
         sarif = json.load(input_file)
 
-    for run in sarif.get('runs', []):
-        if run.get('results', []):
-            new_results = []
-            for result in run['results']:
-                message = get_message_text(result)
-                if message is None:
-                    LOG.debug("Could not get message text from result.")
+    if 'runs' in sarif:
+        for run in sarif['runs']:
+            if 'results' in run:
+                new_results = []
+                for result in run['results']:
+                    message = get_message_text(result)
+                    if message is None:
+                        LOG.debug("Could not get message text from result.")
 
-                if result.get('locations', []):
-                    new_locations = []
+                    if 'locations' in result:
+                        new_locations = []
 
-                    for location in result['locations']:
-                        # TODO: The uri field is optional. We might have to fetch the actual uri from "artifacts" via "index"
-                        # (see https://github.com/microsoft/sarif-tutorials/blob/main/docs/2-Basics.md#-linking-results-to-artifacts)
-                        uri = location.get('physicalLocation', {}).get('artifactLocation', {}).get('uri', None)
+                        for location in result['locations']:
+                            # TODO: The uri field is optional. We might have to fetch the actual uri from "artifacts" via "index"
+                            # (see https://github.com/microsoft/sarif-tutorials/blob/main/docs/2-Basics.md#-linking-results-to-artifacts)
+                            uri = location.get('physicalLocation', {}).get('artifactLocation', {}).get('uri', None)
 
-                        # TODO: The ruleId field is optional and potentially ambiguous. We might have to fetch the actual
-                        # ruleId from the rule metadata via the ruleIndex field.
-                        # (see https://github.com/microsoft/sarif-tutorials/blob/main/docs/2-Basics.md#rule-metadata)
-                        ruleId = result['ruleId']
+                            # TODO: The ruleId field is optional and potentially ambiguous. We might have to fetch the actual
+                            # ruleId from the rule metadata via the ruleIndex field.
+                            # (see https://github.com/microsoft/sarif-tutorials/blob/main/docs/2-Basics.md#rule-metadata)
+                            ruleId = result.get('ruleId', None)
 
-                        if match_patterns(uri, ruleId, message, parsed_patterns):
-                            new_locations.append(location)
-                            # LOG.debug("Location kept: %s", location)
+                            if match_patterns(uri, ruleId, message, parsed_patterns):
+                                new_locations.append(location)
+                                # LOG.debug("Location kept: %s", location)
 
-                    if len(new_locations) > 0:
-                        result['locations'] = new_locations
+                        if len(new_locations) > 0:
+                            result['locations'] = new_locations
+                            new_results.append(result)
+                            LOG.debug("Result kept: %s", result)
+                    else:
+                        # locations array doesn't exist or is empty, so we can't match on anything
+                        # therefore, we include the result in the output
                         new_results.append(result)
-                        LOG.debug("Result kept: %s", result)
-                else:
-                    # locations array doesn't exist or is empty, so we can't match on anything
-                    # therefore, we include the result in the output
-                    new_results.append(result)
-                    LOG.debug("Result kept (with no locations): %s", result)
-            run['results'] = new_results
+                        LOG.debug("Result kept (with no locations): %s", result)
+                run['results'] = new_results
 
     with open(args.output, 'w') as output_file:
         json.dump(sarif, output_file, indent=2)
