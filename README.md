@@ -10,7 +10,7 @@ The following example removes all alerts from all Java test files:
 name: "Filter SARIF"
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 jobs:
   analyze:
