@@ -9,7 +9,7 @@ import argparse
 import json
 import logging
 import re
-from typing import Any, Dict, Iterable, List, NoReturn, Optional, Tuple
+from typing import Any, Dict, Iterable, List, NoReturn, Optional, Tuple, Sequence, Mapping
 from string import Formatter
 
 from globber import match
@@ -101,7 +101,7 @@ class SafeFormatter(Formatter):
     """Prevent arbitrary field names - just allow numeric names, for positional arguments, with no formatting instructions."""
     valid_field_name_re = re.compile(r'^[0-9]{1,2}$')
 
-    def get_field(self, field_name: str, args: List[str], kwargs: Dict[str, str]) -> Any:
+    def get_field(self, field_name: str, args: Sequence[Any], kwargs: Mapping[str, Any]) -> Any:
         if not SafeFormatter.valid_field_name_re.match(field_name):
             raise ValueError('Invalid format string.')
         return super().get_field(field_name, args, kwargs)
