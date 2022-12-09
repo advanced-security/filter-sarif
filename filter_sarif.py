@@ -9,7 +9,8 @@ import argparse
 import json
 import logging
 import re
-from typing import Any, Dict, Iterable, List, NoReturn, Optional, Tuple
+from typing import Any, Dict, Iterable, List, NoReturn, Optional, Tuple, Sequence, Mapping
+from string import Formatter
 
 from globber import match
 
@@ -96,6 +97,16 @@ def parse_pattern(line: str) -> Tuple[bool, str, Optional[str], Optional[str]]:
     return sign, file_pattern, rule_pattern, message_pattern
 
 
+class SafeFormatter(Formatter):
+    """Prevent arbitrary field names - just allow numeric names, for positional arguments, with no formatting instructions."""
+    valid_field_name_re = re.compile(r'^[0-9]{1,2}$')
+
+    def get_field(self, field_name: str, args: Sequence[Any], kwargs: Mapping[str, Any]) -> Any:
+        if not SafeFormatter.valid_field_name_re.match(field_name):
+            raise ValueError('Invalid format string.')
+        return super().get_field(field_name, args, kwargs)
+
+
 def get_message_text(result: Dict[str, Any]) -> Optional[str]:
     """Process result to get message text."""
     message_object = result.get('message', None)
@@ -112,7 +123,8 @@ def get_message_text(result: Dict[str, Any]) -> Optional[str]:
             return message_text
         else:
             try:
-                return message_text.format(*message_arguments)
+                form = SafeFormatter()
+                return form.format(message_text, *message_arguments)
             except Exception as err:
                 LOG.warning("Message arguments malformed: %s", err)
                 return message_text
