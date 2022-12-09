@@ -15,6 +15,7 @@
 # This file has been altered from its original form.
 
 import re
+from typing import List
 
 _double_star_after_invalid_regex = re.compile(r'[^/\\]\*\*')
 _double_star_first_before_invalid_regex = re.compile('^\\*\\*[^/]')
@@ -42,7 +43,7 @@ def _match_component(pattern_component: str, file_name_component: str) -> bool:
         return _match_component(pattern_component[1:], file_name_component[1:])
 
 
-def _match_components(pattern_components: list[str], file_name_components: list[str]) -> bool:
+def _match_components(pattern_components: List[str], file_name_components: List[str]) -> bool:
     if len(pattern_components) == 0 and len(file_name_components) == 0:
         return True
     if len(pattern_components) == 0:
@@ -83,5 +84,5 @@ def match(pattern: str, file_name: str) -> bool:
         pattern = pattern.replace('**/**', '**')
     pattern_components = pattern.split('/')
     # We split on '\' as well as '/' to support unix and windows-style paths
-    file_name_components: list[str] = re.split(r'[\\/]', file_name)
+    file_name_components: List[str] = re.split(r'[\\/]', file_name)
     return _match_components(pattern_components, file_name_components)
