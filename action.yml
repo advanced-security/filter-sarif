@@ -16,5 +16,5 @@ runs:
     - name: filter
       run: |
         unset LD_PRELOAD
-        python3 "${{ github.action_path }}/filter_sarif.py" --input "${{ inputs.input }}" --output "${{ inputs.output }}" --split-lines -- "${{ inputs.patterns }}"
+        python3 "$GITHUB_ACTION_PATH/filter_sarif.py" --input "${{ inputs.input }}" --output "${{ inputs.output }}" --split-lines -- "${{ inputs.patterns }}"
       shell: bash
