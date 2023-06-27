@@ -76,9 +76,16 @@ for example:
 -**/*Test*.java:**               # exclusion pattern: remove all alerts from all Java test files
 -**/*Test*.java                  # ditto, short form of the line above
 +**/*.java:java/sql-injection    # inclusion pattern: This line has precedence over the first two
-                                 # and thus "whitelists" alerts of type "java/sql-injection"
+                                 # and thus allows alerts of type "java/sql-injection"
 **/*.java:java/sql-injection     # ditto, the "+" in inclusion patterns is optional
 **                               # allow all alerts in all files (reverses all previous lines)
+```
+
+A minimal config to allow only files in the path `myproject/` is:
+
+```
+-**/*                            # exclusion pattern: DENY ALL
+myproject/**                     # inclusion pattern: allows alerts in the path 'myproject/'
 ```
 
 * The path separator character in patterns is always `/`, independent of the platform the code is running on and independent of the paths in the SARIF file.
