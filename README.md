@@ -53,6 +53,7 @@ jobs:
       uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: sarif-results/java.sarif
+        category: "/language:${{matrix.language}}"
 
     - name: Upload loc as a Build Artifact
       uses: actions/upload-artifact@v2.2.0
