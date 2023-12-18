@@ -86,7 +86,7 @@ A minimal config to allow only files in the path `myproject/` is:
 
 ```
 -**/*                            # exclusion pattern: DENY ALL
-myproject/**                     # inclusion pattern: allows alerts in the path 'myproject/'
+myproject/**/*                   # inclusion pattern: allows alerts in the path 'myproject/'
 ```
 
 * The path separator character in patterns is always `/`, independent of the platform the code is running on and independent of the paths in the SARIF file.
