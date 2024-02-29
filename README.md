@@ -37,8 +37,9 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
-        upload: False
+        category: "/language:${{matrix.language}}"
         output: sarif-results
+        upload: failure-only
 
     - name: filter-sarif
       uses: advanced-security/filter-sarif@v1
@@ -53,7 +54,6 @@ jobs:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: sarif-results/java.sarif
-        category: "/language:${{matrix.language}}"
 
     - name: Upload loc as a Build Artifact
       uses: actions/upload-artifact@v4
@@ -63,7 +63,7 @@ jobs:
         retention-days: 1
 ```
 
-Note how we provided `upload: False` and `output: sarif-results` to the `analyze` action. That way we can filter the SARIF with the `filter-sarif` action before uploading it via `upload-sarif`. Finally, we also attach the resulting SARIF file to the build, which is convenient for later inspection.
+Note how we provided `upload: failure-only` and `output: sarif-results` to the `analyze` action. That way we can filter the SARIF with the `filter-sarif` action before uploading it via `upload-sarif`. Diagnostic output is still uploaded and visible on the [tool status page](https://docs.github.com/en/code-security/code-scanning/managing-your-code-scanning-configuration/about-the-tool-status-page) if the run fails. Finally, we also attach the resulting SARIF file to the build, which is convenient for later inspection.
 
 # Patterns
 
