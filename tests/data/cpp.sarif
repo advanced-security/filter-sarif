@@ -1,0 +1,47 @@
+{
+    "runs": [
+        {
+            "results": [
+                {
+                    "ruleId": "cpp/stack-overflow",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "io/kb.c",
+                                    "index": 0
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "cpp/stack-overflow",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "src/app.cpp",
+                                    "index": 0
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "cpp/stack-overflow",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "_codeql_build_dir/_deps/libcurl-src/lib/http.c",
+                                    "index": 0
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
