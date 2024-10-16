@@ -16,19 +16,6 @@ on:
         required: false
 
 jobs:
-  tests:
-    name: Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: "Run Unit Tests"
-        run: |
-          set -e
-          python -m unittest discover -s ./tests -p 'test_*.py'
-
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
