@@ -3,19 +3,32 @@ on:
   workflow_dispatch:
     inputs:
       pattern1:
-        description: 'Include or exclude pattern'
+        description: "Include or exclude pattern"
         required: true
       pattern2:
-        description: 'Include or exclude pattern'
+        description: "Include or exclude pattern"
         required: false
       pattern3:
-        description: 'Include or exclude pattern'
+        description: "Include or exclude pattern"
         required: false
       pattern4:
-        description: 'Include or exclude pattern'
+        description: "Include or exclude pattern"
         required: false
 
 jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: "Run Unit Tests"
+        run: |
+          set -e
+          python -m unittest discover -s ./tests -p 'test_*.py'
+
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
@@ -23,48 +36,48 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'java' ]
+        language: ["java"]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
 
-    - run: |
-        javatest/build
+      - run: |
+          javatest/build
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        upload: failure-only
-        output: sarif-results
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          upload: failure-only
+          output: sarif-results
 
-    - name: filter-sarif
-      uses: advanced-security/filter-sarif@main
-      with:
-        #patterns: |
-        #  -**/*.java
-        #  +**/*Exposed*
-        patterns: |
-          ${{ github.event.inputs.pattern1 }}
-          ${{ github.event.inputs.pattern2 }}
-          ${{ github.event.inputs.pattern3 }}
-          ${{ github.event.inputs.pattern4 }}
-        input: sarif-results/java.sarif
-        output: sarif-results/java.sarif
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@main
+        with:
+          #patterns: |
+          #  -**/*.java
+          #  +**/*Exposed*
+          patterns: |
+            ${{ github.event.inputs.pattern1 }}
+            ${{ github.event.inputs.pattern2 }}
+            ${{ github.event.inputs.pattern3 }}
+            ${{ github.event.inputs.pattern4 }}
+          input: sarif-results/java.sarif
+          output: sarif-results/java.sarif
 
-    - name: Upload SARIF
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: sarif-results/java.sarif
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: sarif-results/java.sarif
 
-    - name: Upload loc as a Build Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: sarif-results
-        path: sarif-results
-        retention-days: 1
+      - name: Upload loc as a Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sarif-results
+          path: sarif-results
+          retention-days: 1
