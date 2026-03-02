@@ -60,6 +60,54 @@ def parse_pattern(line):
     return sign, file_pattern, rule_pattern
 
 
+def compute_security_severity_category(raw_score):
+    """Convert a numeric security-severity score string to a named category."""
+    try:
+        numeric = float(raw_score)
+    except (TypeError, ValueError):
+        return None
+    if numeric >= 9.0:
+        return 'critical'
+    if numeric >= 7.0:
+        return 'high'
+    if numeric >= 4.0:
+        return 'medium'
+    if numeric > 0.0:
+        return 'low'
+    return 'none'
+
+
+def collect_rule_severities(run):
+    """Create a lookup from ruleId and ruleIndex to security-severity category."""
+    lookup = {}
+    driver_rules = run.get('tool', {}).get('driver', {}).get('rules', [])
+    for idx, rule_def in enumerate(driver_rules):
+        rid = rule_def.get('id', '')
+        sec_sev = rule_def.get('properties', {}).get('security-severity')
+        cat = compute_security_severity_category(sec_sev)
+        if rid:
+            lookup[rid] = cat
+        lookup[idx] = cat
+    return lookup
+
+
+def result_matches_severity(result, allowed_levels, rule_sev_lookup):
+    """Return True if a result's severity is in the allowed set."""
+    # Check standard SARIF result.level (error, warning, note, none)
+    res_level = result.get('level', '')
+    if res_level.lower() in allowed_levels:
+        return True
+
+    # Check security-severity category derived from rule metadata
+    rid = result.get('ruleId', '')
+    r_idx = result.get('ruleIndex')
+    sev_cat = rule_sev_lookup.get(rid) or rule_sev_lookup.get(r_idx)
+    if sev_cat and sev_cat in allowed_levels:
+        return True
+
+    return False
+
+
 def filter_sarif(args):
     if args.split_lines:
         tmp = []
@@ -68,6 +116,13 @@ def filter_sarif(args):
         args.patterns = tmp
 
     args.patterns = [parse_pattern(p) for p in args.patterns if p]
+
+    severity_filter = None
+    if args.severity:
+        severity_filter = set(
+            tok.strip().lower() for tok in args.severity.split(',') if tok.strip()
+        )
+        print('Severity filter: keeping results with severity in {}'.format(severity_filter))
 
     print('Given patterns:')
     for s, fp, rp in args.patterns:
@@ -83,9 +138,15 @@ def filter_sarif(args):
         s = json.load(f)
 
     for run in s.get('runs', []):
+        rule_sev_lookup = collect_rule_severities(run) if severity_filter else {}
+
         if run.get('results', []):
             new_results = []
             for r in run['results']:
+                # Apply severity filter if specified
+                if severity_filter and not result_matches_severity(r, severity_filter, rule_sev_lookup):
+                    continue
+
                 if r.get('locations', []):
                     new_locations = []
                     for l in r['locations']:
@@ -130,6 +191,11 @@ def main():
         default=False,
         action='store_true',
         help='Split given patterns on newlines.'
+    )
+    parser.add_argument(
+        '--severity',
+        default=None,
+        help='Comma-separated list of severity levels to keep (e.g. "error,warning" or "high,critical").'
     )
     parser.add_argument(
         'patterns',
