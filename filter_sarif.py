@@ -119,9 +119,11 @@ def filter_sarif(args):
 
     severity_filter = None
     if args.severity:
-        severity_filter = set(
-            tok.strip().lower() for tok in args.severity.split(',') if tok.strip()
-        )
+        severity_filter = set()
+        for tok in args.severity.split(','):
+            stripped = tok.strip().lower()
+            if stripped:
+                severity_filter.add(stripped)
         print('Severity filter: keeping results with severity in {}'.format(severity_filter))
 
     print('Given patterns:')

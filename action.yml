@@ -17,11 +17,13 @@ runs:
   using: "composite"
   steps:
     - name: filter
+      env:
+        INPUT_SEVERITY: ${{ inputs.severity }}
       run: |
         unset LD_PRELOAD
-        SEVERITY_ARG=""
-        if [ -n "${{ inputs.severity }}" ]; then
-          SEVERITY_ARG="--severity ${{ inputs.severity }}"
+        if [ -n "$INPUT_SEVERITY" ]; then
+          python3 "$GITHUB_ACTION_PATH/filter_sarif.py" --input "${{ inputs.input }}" --output "${{ inputs.output }}" --split-lines --severity "$INPUT_SEVERITY" -- "${{ inputs.patterns }}"
+        else
+          python3 "$GITHUB_ACTION_PATH/filter_sarif.py" --input "${{ inputs.input }}" --output "${{ inputs.output }}" --split-lines -- "${{ inputs.patterns }}"
         fi
-        python3 "$GITHUB_ACTION_PATH/filter_sarif.py" --input "${{ inputs.input }}" --output "${{ inputs.output }}" --split-lines $SEVERITY_ARG -- "${{ inputs.patterns }}"
       shell: bash
