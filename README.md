@@ -42,7 +42,7 @@ jobs:
         upload: failure-only
 
     - name: filter-sarif
-      uses: advanced-security/filter-sarif@v1
+      uses: advanced-security/filter-sarif@v1.1
       with:
         patterns: |
           +**/*.java
