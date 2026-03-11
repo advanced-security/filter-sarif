@@ -100,21 +100,14 @@ def collect_rule_severities(run):
 
     # Process driver rules
     driver_rules = run.get('tool', {}).get('driver', {}).get('rules', [])
-    print(f"[DEBUG] Driver rules count: {len(driver_rules)}")
     _process_rules(driver_rules, 'driver')
 
     # Process extension rules (e.g. CodeQL query packs)
     extensions = run.get('tool', {}).get('extensions', [])
-    print(f"[DEBUG] Extensions count: {len(extensions)}")
     for ext in extensions:
         ext_name = ext.get('name', '?')
-        ext_rules = ext.get('rules', [])
-        if ext_rules:
-            print(f"[DEBUG] Extension {ext_name} has {len(ext_rules)} rules")
-        _process_rules(ext_rules, ext_name)
+        _process_rules(ext.get('rules', []), ext_name)
 
-    print(f"[DEBUG] rule_sev_lookup has {len(sec_sev_lookup)} entries")
-    print(f"[DEBUG] rule_default_level_lookup has {len(default_level_lookup)} entries")
     return sec_sev_lookup, default_level_lookup
 
 
@@ -183,22 +176,13 @@ def filter_sarif(args):
 
     for run in s.get('runs', []):
         rule_sev_lookup, rule_default_level_lookup = collect_rule_severities(run) if severity_filter else ({}, {})
-        print(f"[DEBUG] rule_sev_lookup: {rule_sev_lookup}")
-        print(f"[DEBUG] rule_default_level_lookup: {rule_default_level_lookup}")
 
         if run.get('results', []):
             new_results = []
             for r in run['results']:
                 # Apply severity filter if specified
-                if severity_filter:
-                    rid = r.get('ruleId', '')
-                    r_level = r.get('level')
-                    sev_cat = rule_sev_lookup.get(rid)
-                    def_level = rule_default_level_lookup.get(rid)
-                    matches = result_matches_severity(r, severity_filter, rule_sev_lookup, rule_default_level_lookup)
-                    print(f"[DEBUG] Result ruleId={rid}, level={r_level}, sev_cat={sev_cat}, def_level={def_level}, matches={matches}")
-                    if not matches:
-                        continue
+                if severity_filter and not result_matches_severity(r, severity_filter, rule_sev_lookup, rule_default_level_lookup):
+                    continue
 
                 if r.get('locations', []):
                     new_locations = []
