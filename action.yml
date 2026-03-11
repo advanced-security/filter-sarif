@@ -8,7 +8,7 @@ inputs:
     description: 'Path to the input SARIF file'
     required: true
   output:
-    description: 'Path to the input SARIF file'
+    description: 'Path to the output SARIF file'
     required: true
   severity:
     description: 'Optional comma-separated list of severity levels to keep (e.g. "error,warning" or "high,critical"). Supports SARIF levels (error, warning, note, none) and security severity categories (critical, high, medium, low).'
