@@ -60,6 +60,11 @@ def parse_pattern(line):
     return sign, file_pattern, rule_pattern
 
 
+VALID_SARIF_LEVELS = {'error', 'warning', 'note', 'none'}
+VALID_SECURITY_CATEGORIES = {'critical', 'high', 'medium', 'low'}
+VALID_SEVERITY_VALUES = VALID_SARIF_LEVELS | VALID_SECURITY_CATEGORIES
+
+
 def compute_security_severity_category(raw_score):
     """Convert a numeric security-severity score string to a named category."""
     try:
@@ -74,27 +79,44 @@ def compute_security_severity_category(raw_score):
         return 'medium'
     if numeric > 0.0:
         return 'low'
-    return 'none'
+    return None
 
 
 def collect_rule_severities(run):
-    """Create a lookup from ruleId and ruleIndex to security-severity category."""
-    lookup = {}
+    """Create lookups from ruleId/ruleIndex to security-severity category and default level."""
+    sec_sev_lookup = {}
+    default_level_lookup = {}
     driver_rules = run.get('tool', {}).get('driver', {}).get('rules', [])
     for idx, rule_def in enumerate(driver_rules):
         rid = rule_def.get('id', '')
         sec_sev = rule_def.get('properties', {}).get('security-severity')
         cat = compute_security_severity_category(sec_sev)
         if rid:
-            lookup[rid] = cat
-        lookup[idx] = cat
-    return lookup
+            sec_sev_lookup[rid] = cat
+        sec_sev_lookup[idx] = cat
+
+        def_level = rule_def.get('defaultConfiguration', {}).get('level')
+        if def_level:
+            if rid:
+                default_level_lookup[rid] = def_level.lower()
+            default_level_lookup[idx] = def_level.lower()
+    return sec_sev_lookup, default_level_lookup
 
 
-def result_matches_severity(result, allowed_levels, rule_sev_lookup):
+def result_matches_severity(result, allowed_levels, rule_sev_lookup, rule_default_level_lookup):
     """Return True if a result's severity is in the allowed set."""
-    # Check standard SARIF result.level (error, warning, note, none)
-    res_level = result.get('level', '')
+    # Check standard SARIF result.level (error, warning, note, none).
+    # Per SARIF spec, missing/empty level defaults to the rule's defaultConfiguration.level,
+    # or "warning" if that is also absent.
+    res_level = result.get('level') or None
+    if res_level is None:
+        rid = result.get('ruleId', '')
+        r_idx = result.get('ruleIndex')
+        res_level = rule_default_level_lookup.get(rid)
+        if res_level is None:
+            res_level = rule_default_level_lookup.get(r_idx)
+        if res_level is None:
+            res_level = 'warning'
     if res_level.lower() in allowed_levels:
         return True
 
@@ -122,9 +144,14 @@ def filter_sarif(args):
         severity_filter = set()
         for tok in args.severity.split(','):
             stripped = tok.strip().lower()
-            if stripped:
-                severity_filter.add(stripped)
-        print('Severity filter: keeping results with severity in {}'.format(severity_filter))
+            if not stripped:
+                continue
+            if stripped not in VALID_SEVERITY_VALUES:
+                fail('Unknown severity value: "{}". Valid values are: {}'.format(
+                    stripped, ', '.join(sorted(VALID_SEVERITY_VALUES))))
+            severity_filter.add(stripped)
+        print('Severity filter: keeping results with severity in {}'.format(
+            ', '.join(sorted(severity_filter))))
 
     print('Given patterns:')
     for s, fp, rp in args.patterns:
@@ -140,13 +167,13 @@ def filter_sarif(args):
         s = json.load(f)
 
     for run in s.get('runs', []):
-        rule_sev_lookup = collect_rule_severities(run) if severity_filter else {}
+        rule_sev_lookup, rule_default_level_lookup = collect_rule_severities(run) if severity_filter else ({}, {})
 
         if run.get('results', []):
             new_results = []
             for r in run['results']:
                 # Apply severity filter if specified
-                if severity_filter and not result_matches_severity(r, severity_filter, rule_sev_lookup):
+                if severity_filter and not result_matches_severity(r, severity_filter, rule_sev_lookup, rule_default_level_lookup):
                     continue
 
                 if r.get('locations', []):
