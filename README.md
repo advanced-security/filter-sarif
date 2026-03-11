@@ -47,6 +47,7 @@ jobs:
         patterns: |
           +**/*.java
           -**/*Test*.java
+        severity: high,critical
         input: sarif-results/java.sarif
         output: sarif-results/java.sarif
 
@@ -95,3 +96,31 @@ myproject/**/*                   # inclusion pattern: allows alerts in the path 
 * The rule pattern is optional. If omitted, it will apply to alerts of all types.
 * Subsequent lines override earlier ones. By default all alerts are included.
 * If you need to use the literals `+`, `-`, `\` or `:` in your pattern, you can escape them with `\`, e.g. `\-this/is/an/inclusion/file/pattern\:with-a-semicolon:and/a/rule/pattern/with/a/\\/backslash`. For `+` and `-`, this is only necessary if they appear at the beginning of the pattern line.
+
+# Severity
+
+The optional `severity` input allows you to filter alerts by severity level. It accepts a comma-separated list of severity values. Only alerts matching at least one of the specified values will be kept. If omitted, all severity levels are included.
+
+Two kinds of severity values are supported:
+
+* **SARIF result level**: `error`, `warning`, `note`, `none` — matched against the `level` field of each result.
+* **Security severity category**: `critical`, `high`, `medium`, `low` — derived from the numeric `security-severity` property on rule metadata, using the standard mapping:
+  * `critical`: score ≥ 9.0
+  * `high`: score ≥ 7.0
+  * `medium`: score ≥ 4.0
+  * `low`: score > 0.0
+
+You can combine both kinds in a single value, for example `severity: error,high,critical`.
+
+Example usage:
+
+```yaml
+    - name: filter-sarif
+      uses: advanced-security/filter-sarif@v1
+      with:
+        patterns: |
+          +**/*.java
+        severity: high,critical
+        input: sarif-results/java.sarif
+        output: sarif-results/java.sarif
+```
