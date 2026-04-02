@@ -52,11 +52,7 @@ jobs:
         #patterns: |
         #  -**/*.java
         #  +**/*Exposed*
-        patterns: |
-          ${{ github.event.inputs.pattern1 }}
-          ${{ github.event.inputs.pattern2 }}
-          ${{ github.event.inputs.pattern3 }}
-          ${{ github.event.inputs.pattern4 }}
+        patterns: "${{ github.event.inputs.pattern1 }}\n${{ github.event.inputs.pattern2 }}\n${{ github.event.inputs.pattern3 }}\n${{ github.event.inputs.pattern4 }}"
         input: sarif-results/java.sarif
         output: sarif-results/java.sarif
 
