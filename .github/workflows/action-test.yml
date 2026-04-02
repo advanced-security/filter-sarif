@@ -1,6 +1,7 @@
 name: "Action Test"
 permissions:
   contents: read
+  security-events: write
 on:
   workflow_dispatch:
     inputs:
