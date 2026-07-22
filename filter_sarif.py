@@ -41,7 +41,11 @@ def parse_pattern(line):
         i = i + 1
         if c == sepchar:
             if seen_separator:
-                raise Exception('Invalid pattern: "' + line + '" Contains more than one separator!')
+                raise Exception(
+                    'Invalid pattern "{}": contains more than one "{}" separator.'.format(
+                        line, sepchar
+                    )
+                )
             seen_separator = True
             continue
         elif c == escchar:

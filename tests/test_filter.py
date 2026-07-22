@@ -14,7 +14,7 @@ class TestFilter(unittest.TestCase):
         self.assertEqual(len(self.sarif["runs"][0]["results"]), 3)
         return super().setUp()
 
-    def _run_filter(self, patterns):
+    def _filter_sarif_with_patterns(self, patterns):
         with TemporaryDirectory() as temp_dir:
             input_path = Path(temp_dir) / "input.sarif"
             output_path = Path(temp_dir) / "output.sarif"
@@ -35,13 +35,13 @@ class TestFilter(unittest.TestCase):
 
     def test_exclude_all(self):
         patterns = ["-**/*"]
-        sarif = self._run_filter(patterns)
+        sarif = self._filter_sarif_with_patterns(patterns)
         # Excluding everything
         self.assertEqual(len(sarif["runs"][0]["results"]), 0)
 
     def test_exclude_all_except_one(self):
         # -**/* [exclude everything first], +src/** [include everything in src]
         patterns = ["-**/*", "+src/**"]
-        sarif = self._run_filter(patterns)
+        sarif = self._filter_sarif_with_patterns(patterns)
         # Only 1
         self.assertEqual(len(sarif["runs"][0]["results"]), 1)
