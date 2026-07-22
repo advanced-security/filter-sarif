@@ -8,13 +8,22 @@ inputs:
     description: 'Path to the input SARIF file'
     required: true
   output:
-    description: 'Path to the input SARIF file'
+    description: 'Path to the output SARIF file'
     required: true
+  severity:
+    description: 'Optional comma-separated list of severity levels to keep (e.g. "error,warning" or "high,critical"). Supports SARIF levels (error, warning, note, none) and security severity categories (critical, high, medium, low).'
+    required: false
 runs:
   using: "composite"
   steps:
     - name: filter
+      env:
+        INPUT_SEVERITY: ${{ inputs.severity }}
       run: |
         unset LD_PRELOAD
-        python3 "$GITHUB_ACTION_PATH/filter_sarif.py" --input "${{ inputs.input }}" --output "${{ inputs.output }}" --split-lines -- "${{ inputs.patterns }}"
+        if [ -n "$INPUT_SEVERITY" ]; then
+          python3 "$GITHUB_ACTION_PATH/filter_sarif.py" --input "${{ inputs.input }}" --output "${{ inputs.output }}" --split-lines --severity "$INPUT_SEVERITY" -- "${{ inputs.patterns }}"
+        else
+          python3 "$GITHUB_ACTION_PATH/filter_sarif.py" --input "${{ inputs.input }}" --output "${{ inputs.output }}" --split-lines -- "${{ inputs.patterns }}"
+        fi
       shell: bash
