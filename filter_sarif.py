@@ -46,7 +46,7 @@ def parse_pattern(line):
             continue
         elif c == escchar:
             nextc = uline[i] if (i < len(uline)) else None
-            if nextc in ['+' , '-', escchar, sepchar]:
+            if nextc in ['+', '-', escchar, sepchar]:
                 i = i + 1
                 c = nextc
         if seen_separator:
@@ -83,11 +83,11 @@ def compute_security_severity_category(raw_score):
 
 
 def collect_rule_severities(run):
-    '''Create lookups from ruleId/ruleIndex to security-severity category and default level.'''
+    """Create lookups from ruleId/ruleIndex to security-severity category and default level."""
     sec_sev_lookup = {}
     default_level_lookup = {}
 
-    def _process_rules(rules, source_name):
+    def _process_rules(rules):
         for idx, rule_def in enumerate(rules):
             rid = rule_def.get('id', '')
             sec_sev = rule_def.get('properties', {}).get('security-severity')
@@ -100,13 +100,12 @@ def collect_rule_severities(run):
 
     # Process driver rules
     driver_rules = run.get('tool', {}).get('driver', {}).get('rules', [])
-    _process_rules(driver_rules, 'driver')
+    _process_rules(driver_rules)
 
     # Process extension rules (e.g. CodeQL query packs)
     extensions = run.get('tool', {}).get('extensions', [])
     for ext in extensions:
-        ext_name = ext.get('name', '?')
-        _process_rules(ext.get('rules', []), ext_name)
+        _process_rules(ext.get('rules', []))
 
     return sec_sev_lookup, default_level_lookup
 
